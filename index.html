@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meovv's Weather App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/ffeba28146.js" crossorigin="anonymous"></script> 
+    <style>
+        .weatherApp {
+            background-color: #f0f4f8;
+            width: 610px;
+            display: block;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: 20px;
+            padding-bottom: 60px;
+            font-family: "Afacad Flux", serif;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 70%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #9aa6b2;
+        }
+
+        button {
+            width: 25%;
+            padding: 10px;
+            border: 1px solid #a8c7e6;
+            border-radius: 5px;
+            background-color: #accff1;
+            color: #fff;
+        }
+
+        .loading {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .weather-info {
+            margin-top: 20px;
+        }
+
+        .temperature {
+            font-size: 80px;
+            font-weight: bold;
+            margin-top: 80px;
+            margin-left: 20px;
+        }
+
+        #icon {
+            width: 200px;
+        }
+
+        .descriptions {
+            background-color: #d9eafd;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        .condition {
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .info {
+            font-size: 30px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="weatherApp">
+        <h1>Meovv's Weather App</h1>
+
+        <input type="text" id="city" placeholder="Enter a city...">
+        <button onclick="getWeather()">Get Weather</button>
+
+        <div class="loading" style="display: none;">Loading...</div>
+
+        <div class="weather-info" style="display: none;">
+            <i class="fa-solid fa-location-dot"></i>
+            <span class="city"></span>,
+            <span class="country"></span>
+            <br>
+            <i class="fa-regular fa-clock"></i>
+            <span class="localtime"></span>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="temperature"></div>
+                    </div>
+                    <div class="col-6">
+                        <div class="weather-icon">
+                            <img src="" alt="weather-icon" id="icon">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="descriptions">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="condition"></p>
+                        </div>
+                        <div class="col-6">
+                            <p><i class="fa-solid fa-droplet"></i> Humidity</p>
+                            <p class="humidity info"></p>
+                        </div>
+                        <div class="col-6">
+                            <p><i class="fa-solid fa-wind"></i> Wind Speed</p>
+                            <p class="wind info"></p>
+                        </div>
+                        <div class="col-6">
+                            <p><i class="fa-solid fa-temperature-quarter"></i> Pressure</p>
+                            <p class="pressure info"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "a21495c1ef3843ecb6981847242512";
+
+        function getWeather() {
+            const city = document.getElementById("city").value;
+            if (!city) {
+                alert("Please enter a city!");
+                return;
+            }
+
+            document.querySelector(".loading").style.display = "block";
+            document.querySelector(".weather-info").style.display = "none";
+
+            const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`;
+
+            fetch(url).then(Response => Response.json())
+                      .then(data => {
+
+                        document.querySelector(".loading").style.display = "none";
+
+                        if (data.error) {
+                            alert("City not found! Please try again.")
+                        } else {
+                            displayWeather(data);
+                        }
+                      })
+                      .catch(error => {
+                        document.querySelector(".loading").style.display = "none";
+                        alert("An error occured. Please try again later.");
+                      });
+        }
+
+        function displayWeather(data) {
+            const city = data.location.name;
+            const country = data.location.country;
+            const localtime = data.location.localtime;
+            const temperature = data.current.temp_c;
+            const condition = data.current.condition.text;
+            const humidity = data.current.humidity;
+            const icon = data.current.condition.icon;
+            const iconUrl = `http:${icon}`;
+            const wind = data.current.wind_kph;
+            const pressure = data.current.pressure_mb;
+
+            document.querySelector(".city").innerHTML = city;
+            document.querySelector(".country").innerHTML = country;
+            document.querySelector(".localtime").innerHTML = localtime;
+            document.querySelector(".temperature").innerHTML = `${temperature}&degC`;
+            document.querySelector(".condition").innerHTML = condition;
+            document.querySelector(".humidity").innerHTML = `${humidity} %`;
+            document.querySelector(".wind").innerHTML = `${wind} km/h`;
+            document.querySelector(".pressure").innerHTML = `${pressure} mb`;
+            document.querySelector("#icon").src = iconUrl;
+
+            document.querySelector(".loading").style.display = "none";
+            document.querySelector(".weather-info").style.display = "block";
+        }
+    </script>
+</body>
+</html>
